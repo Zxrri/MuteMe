@@ -29,17 +29,21 @@
         private void InitializeComponent()
         {
             SuspendLayout();
-            // 
+            //
             // MainForm
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Name = "MainForm";
-            Text = "Form1";
+            Text = "MuteMe";
+            ShowInTaskbar = false;           // Hides from taskbar
+            WindowState = FormWindowState.Minimized;
+            FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Load += MainForm_Load;
             ResumeLayout(false);
         }
+
 
         #endregion
     }
