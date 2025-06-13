@@ -29,7 +29,7 @@ Settings are saved in a local `settings.json` file and include:
 
 ## 🚀 Downloads
 
-Visit the [Releases tab](https://github.com/YOUR_USERNAME/MuteMe/releases) to download the latest `.exe`.
+Visit the [Releases tab](https://github.com/Zxrri/MuteMe/releases) to download the latest `.exe`.
 
 ## 📥 How to Use
 
