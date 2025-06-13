@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace MuteMe.Models
 {
-    internal class Settings
+    public class AppSettings
     {
+        public int IdleTimeoutSeconds { get; set; } = 120;
+        public bool MuteSystem { get; set; } = true;
+        public bool MuteMic { get; set; } = true;
+        public bool ShowNotifications { get; set; } = true;
     }
 }
