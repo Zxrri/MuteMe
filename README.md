@@ -1,6 +1,6 @@
 # 🔇 MuteMe
 
-MuteMe is a lightweight tray utility that automatically mutes your microphone and/or system audio after inactivity.
+MuteMe is a Windows lightweight tray utility that automatically mutes your microphone and/or system audio after inactivity.
 
 ##  Features
 
