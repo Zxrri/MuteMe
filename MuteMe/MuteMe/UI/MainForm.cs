@@ -79,7 +79,6 @@ namespace MuteMe
         {
             try
             {
-                // Check browser windows
                 foreach (string browser in supportedBrowsers)
                 {
                     var procs = Process.GetProcessesByName(browser);
