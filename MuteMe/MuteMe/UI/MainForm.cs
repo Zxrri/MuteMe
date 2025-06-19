@@ -62,6 +62,7 @@ namespace MuteMe
             trayIcon.ContextMenuStrip.Items.Add(versionItem);
 
             trayIcon.ContextMenuStrip.Items.Add("Settings", null, OnSettingsClick);
+            trayIcon.ContextMenuStrip.Items.Add("Check for Updates", null, OnCheckForUpdatesClick);
             trayIcon.ContextMenuStrip.Items.Add("Exit", null, (s, ev) => this.Close());
 
             idleCheckTimer = new System.Windows.Forms.Timer { Interval = 2000 };
@@ -202,7 +203,6 @@ namespace MuteMe
                 MessageBox.Show($"Update check failed:\n{ex.Message}", "MuteMe Updater", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
 
         protected override void OnFormClosing(FormClosingEventArgs e)
