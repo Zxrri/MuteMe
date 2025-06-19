@@ -6,6 +6,7 @@ using MuteMe.Utils;
 using MuteMe.UI;
 using MuteMe.Services;
 using System.Diagnostics;
+using System.IO.Compression;
 
 namespace MuteMe
 {
@@ -152,6 +153,57 @@ namespace MuteMe
                 idleCheckTimer.Start();
             }
         }
+        private async void OnCheckForUpdatesClick(object? sender, EventArgs e)
+        {
+            try
+            {
+                var (updateAvailable, exeUrl, version) = await UpdateChecker.CheckForUpdateAsync();
+
+                if (!updateAvailable)
+                {
+                    MessageBox.Show("You're already running the latest version.", "MuteMe Updater", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                DialogResult result = MessageBox.Show(
+                    $"Update available: {version}\nDo you want to update now?",
+                    "MuteMe Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (result == DialogResult.Yes)
+                {
+                    string zipPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "update.zip");
+                    string extractPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "update_extract");
+
+                    using var httpClient = new HttpClient();
+                    var data = await httpClient.GetByteArrayAsync(exeUrl);
+                    await File.WriteAllBytesAsync(zipPath, data);
+
+                    if (Directory.Exists(extractPath))
+                        Directory.Delete(extractPath, true);
+
+                    ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+                    string extractedExe = Path.Combine(extractPath, "MuteMe.exe");
+                    if (!File.Exists(extractedExe))
+                    {
+                        MessageBox.Show("Downloaded update is missing MuteMe.exe", "Updater", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    Process.Start("Updater.exe", $"\"{Application.ExecutablePath}\" \"{extractedExe}\"");
+                    Application.Exit();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Update check failed:\n{ex.Message}", "MuteMe Updater", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {

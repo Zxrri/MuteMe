@@ -30,4 +30,18 @@
 		<PackageReference Include="NAudio" Version="2.2.1" />
 	</ItemGroup>
 
+	<!-- Automatically copy Updater.exe from the Updater project after build -->
+	<Target Name="CopyUpdaterExe" AfterTargets="Build">
+		<Copy
+		  SourceFiles="..\Updater\bin\$(Configuration)\net8.0\Updater.exe"
+		  DestinationFolder="$(OutputPath)"
+		  SkipUnchangedFiles="true" />
+	</Target>
+	<Target Name="CopyUpdaterExeOnPublish" AfterTargets="Publish">
+		<Copy
+		  SourceFiles="..\Updater\bin\$(Configuration)\net8.0\Updater.exe"
+		  DestinationFolder="$(PublishDir)"
+		  SkipUnchangedFiles="true" />
+	</Target>
+
 </Project>
