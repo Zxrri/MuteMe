@@ -187,6 +187,13 @@ namespace MuteMe
 
                     ZipFile.ExtractToDirectory(zipPath, extractPath);
 
+                    if (File.Exists(zipPath))
+                    {
+                        File.Delete(zipPath);
+                    }
+
+
+
                     string extractedExe = Path.Combine(extractPath, "MuteMe.exe");
                     if (!File.Exists(extractedExe))
                     {

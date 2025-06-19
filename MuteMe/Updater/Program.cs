@@ -2,16 +2,26 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace Updater
 {
-    internal class Program
+    internal static class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
+            MessageBox.Show("Updater launched.");
+
+            File.AppendAllText("debug.log", $"Updater started at {DateTime.Now}\n");
+
+            System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            System.Windows.Forms.Application.EnableVisualStyles();
+            System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
+
             if (args.Length != 2)
             {
-                Console.WriteLine("Usage: Updater.exe <oldExe> <newExe>");
+                MessageBox.Show("Usage: Updater.exe <oldExePath> <newExePath>", "Updater", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -20,38 +30,38 @@ namespace Updater
 
             try
             {
-                Console.WriteLine("Waiting for app to exit...");
-                Thread.Sleep(3000); 
+                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "update.log");
+                File.AppendAllText(logPath, $"[{DateTime.Now}] Update started.\n");
 
-                Console.WriteLine("Replacing old exe...");
+                Thread.Sleep(3000); // Ensure app is closed
+
                 if (File.Exists(oldExe))
+                {
                     File.Delete(oldExe);
+                    File.AppendAllText(logPath, "Old EXE deleted.\n");
+                }
 
                 File.Move(newExe, oldExe);
+                File.AppendAllText(logPath, "New EXE moved.\n");
 
-                Console.WriteLine("Launching updated app...");
-                var startInfo = new ProcessStartInfo
+                Process.Start(oldExe);
+                File.AppendAllText(logPath, "New EXE launched.\n");
+
+                // Optional: delete extracted update folder if needed
+                string updateFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "update_extract");
+                if (Directory.Exists(updateFolder))
                 {
-                    FileName = oldExe,
-                    UseShellExecute = true,
-                    WorkingDirectory = Path.GetDirectoryName(oldExe) ?? ""
-                };
-                Process.Start(startInfo);
+                    Directory.Delete(updateFolder, true);
+                    File.AppendAllText(logPath, "Update extract folder deleted.\n");
+                }
 
-                // Cleanup
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string zipPath = Path.Combine(baseDir, "update.zip");
-                string extractPath = Path.Combine(baseDir, "update_extract");
-
-                if (File.Exists(zipPath))
-                    File.Delete(zipPath);
-
-                if (Directory.Exists(extractPath))
-                    Directory.Delete(extractPath, true);
+                File.AppendAllText(logPath, "Update finished.\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Update failed: " + ex.Message);
+                string errorMsg = $"Update failed: {ex.Message}";
+                File.AppendAllText("update.log", $"[{DateTime.Now}] {errorMsg}\n{ex}\n");
+                MessageBox.Show(errorMsg, "Updater Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

@@ -9,10 +9,10 @@
 		<ApplicationIcon>Resources\mute_icon.ico</ApplicationIcon>
 
 		<!-- VERSIONING -->
-		<Version>1.2.0</Version>
-		<AssemblyVersion>1.2.0.0</AssemblyVersion>
-		<FileVersion>1.2.0.0</FileVersion>
-		<PackageVersion>1.2.0</PackageVersion>
+		<Version>1.3.0</Version>
+		<AssemblyVersion>1.3.0.0</AssemblyVersion>
+		<FileVersion>1.3.0.0</FileVersion>
+		<PackageVersion>1.3.0</PackageVersion>
 	</PropertyGroup>
 
 	<!-- Remove the icon from default processing -->
