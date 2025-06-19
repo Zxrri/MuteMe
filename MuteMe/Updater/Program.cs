@@ -21,7 +21,7 @@ namespace Updater
             try
             {
                 Console.WriteLine("Waiting for app to exit...");
-                Thread.Sleep(3000); // Wait to ensure app is fully closed
+                Thread.Sleep(3000); 
 
                 Console.WriteLine("Replacing old exe...");
                 if (File.Exists(oldExe))
@@ -30,7 +30,24 @@ namespace Updater
                 File.Move(newExe, oldExe);
 
                 Console.WriteLine("Launching updated app...");
-                Process.Start(oldExe);
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = oldExe,
+                    UseShellExecute = true,
+                    WorkingDirectory = Path.GetDirectoryName(oldExe) ?? ""
+                };
+                Process.Start(startInfo);
+
+                // Cleanup
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string zipPath = Path.Combine(baseDir, "update.zip");
+                string extractPath = Path.Combine(baseDir, "update_extract");
+
+                if (File.Exists(zipPath))
+                    File.Delete(zipPath);
+
+                if (Directory.Exists(extractPath))
+                    Directory.Delete(extractPath, true);
             }
             catch (Exception ex)
             {
