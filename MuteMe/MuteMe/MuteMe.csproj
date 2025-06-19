@@ -9,25 +9,35 @@
 		<ApplicationIcon>Resources\mute_icon.ico</ApplicationIcon>
 
 		<!-- VERSIONING -->
-		<Version>1.0.3</Version>
-		<AssemblyVersion>1.0.3.0</AssemblyVersion>
-		<FileVersion>1.0.3.0</FileVersion>
-		<PackageVersion>1.0.3</PackageVersion>
-		<!-- Optional for NuGet packaging -->
+		<Version>1.2.0</Version>
+		<AssemblyVersion>1.2.0.0</AssemblyVersion>
+		<FileVersion>1.2.0.0</FileVersion>
+		<PackageVersion>1.2.0</PackageVersion>
 	</PropertyGroup>
 
+	<!-- Remove the icon from default processing -->
 	<ItemGroup>
 		<None Remove="Resources\mute_icon.ico" />
 	</ItemGroup>
 
+	<!-- Add back the icon as a content resource -->
 	<ItemGroup>
 		<Content Include="Resources\mute_icon.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
+	<!-- NAudio package reference -->
 	<ItemGroup>
 		<PackageReference Include="NAudio" Version="2.2.1" />
 	</ItemGroup>
+
+	<!-- Automatically copy Updater.exe from the Updater project after build -->
+	<Target Name="CopyUpdaterExe" AfterTargets="Build">
+		<Copy
+		  SourceFiles="..\Updater\bin\$(Configuration)\net8.0\Updater.exe"
+		  DestinationFolder="$(OutputPath)"
+		  SkipUnchangedFiles="true" />
+	</Target>
 
 </Project>

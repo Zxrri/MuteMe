@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace MuteMe.Utils
 {
@@ -6,8 +7,13 @@ namespace MuteMe.Utils
     {
         public static string GetVersionString(bool includePrefix = true)
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
-            return (includePrefix ? "v" : "") + (version?.ToString() ?? "unknown");
+            var version = GetVersion();
+            return (includePrefix ? "v" : "") + version.ToString();
+        }
+
+        public static Version GetVersion()
+        {
+            return Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0);
         }
     }
 }
