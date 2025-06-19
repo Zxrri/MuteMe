@@ -61,6 +61,7 @@ namespace MuteMe
             trayIcon.ContextMenuStrip.Items.Add(versionItem);
 
             trayIcon.ContextMenuStrip.Items.Add("Settings", null, OnSettingsClick);
+            trayIcon.ContextMenuStrip.Items.Add("Check for Updates", null, OnCheckForUpdatesClick);
             trayIcon.ContextMenuStrip.Items.Add("Exit", null, (s, ev) => this.Close());
 
             idleCheckTimer = new System.Windows.Forms.Timer { Interval = 2000 };
@@ -152,6 +153,44 @@ namespace MuteMe
                 idleCheckTimer.Start();
             }
         }
+        private async void OnCheckForUpdatesClick(object? sender, EventArgs e)
+        {
+            try
+            {
+                var (updateAvailable, exeUrl, version) = await UpdateChecker.CheckForUpdateAsync();
+
+                if (!updateAvailable)
+                {
+                    MessageBox.Show("You're already running the latest version.", "MuteMe Updater", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                DialogResult result = MessageBox.Show(
+                    $"Update available: v{version}\nDo you want to update now?",
+                    "MuteMe Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (result == DialogResult.Yes)
+                {
+                    string newExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MuteMe_New.exe");
+                    string oldExe = Application.ExecutablePath;
+
+                    using var client = new HttpClient();
+                    var data = await client.GetByteArrayAsync(exeUrl);
+                    await File.WriteAllBytesAsync(newExe, data);
+
+                    Process.Start("Updater.exe", $"\"{oldExe}\" \"{newExe}\"");
+                    Application.Exit();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Update check failed:\n{ex.Message}", "MuteMe Updater", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
