@@ -5,6 +5,7 @@ using MuteMe.Models;
 using MuteMe.Utils;
 using MuteMe.UI;
 using MuteMe.Services;
+using System.Diagnostics;
 
 namespace MuteMe
 {
@@ -15,6 +16,20 @@ namespace MuteMe
         private AppSettings settings;
         private bool isMuted = false;
 
+        private static readonly string[] mediaKeywords = new[]
+        {
+            "YouTube", "Netflix", "Twitch", "Spotify", "Vimeo", "Prime Video", "Disney+"
+        };
+
+        private static readonly string[] supportedBrowsers = new[]
+        {
+            "chrome", "msedge", "firefox", "opera", "brave"
+        };
+
+        private static readonly string[] mediaApps = new[]
+        {
+            "Spotify", "vlc", "wmplayer", "Music.UI", "Netflix", "AmazonVideo.PrimeVideo", 
+        };
         public MainForm()
         {
             InitializeComponent();
@@ -41,6 +56,9 @@ namespace MuteMe
                 Text = "MuteMe - Running",
                 ContextMenuStrip = new ContextMenuStrip()
             };
+            var versionItem = new ToolStripMenuItem($"Version {VersionHelper.GetVersionString()}");
+            versionItem.Enabled = false;
+            trayIcon.ContextMenuStrip.Items.Add(versionItem);
 
             trayIcon.ContextMenuStrip.Items.Add("Settings", null, OnSettingsClick);
             trayIcon.ContextMenuStrip.Items.Add("Exit", null, (s, ev) => this.Close());
@@ -57,11 +75,53 @@ namespace MuteMe
             this.Hide(); 
         }
 
+        private bool IsMediaPlaying()
+        {
+            try
+            {
+                foreach (string browser in supportedBrowsers)
+                {
+                    var procs = Process.GetProcessesByName(browser);
+                    foreach (var p in procs)
+                    {
+                        string title = p.MainWindowTitle;
+                        if (!string.IsNullOrWhiteSpace(title))
+                        {
+                            foreach (var keyword in mediaKeywords)
+                            {
+                                if (title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+
+                foreach (string app in mediaApps)
+                {
+                    var procs = Process.GetProcessesByName(app);
+                    foreach (var p in procs)
+                    {
+                        if (!string.IsNullOrWhiteSpace(p.MainWindowTitle))
+                            return true; // Running and has a UI
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore exceptions silently
+            }
+
+            return false;
+        }
+
+
         private void CheckIdle(object sender, EventArgs e)
         {
             int idleMs = IdleWatcher.GetIdleTimeMs();
 
-            if (idleMs >= settings.IdleTimeoutSeconds * 1000 && !isMuted)
+            bool isMediaPlaying = IsMediaPlaying();
+
+            if (idleMs >= settings.IdleTimeoutSeconds * 1000 && !isMuted && !isMediaPlaying)
             {
                 if (settings.MuteSystem) AudioController.MuteSystemAudio(true);
                 if (settings.MuteMic) AudioController.MuteMic(true);
@@ -70,7 +130,7 @@ namespace MuteMe
                 if (settings.ShowNotifications)
                     trayIcon.ShowBalloonTip(1000, "MuteMe", "System muted due to inactivity.", ToolTipIcon.Info);
             }
-            else if (idleMs < settings.IdleTimeoutSeconds * 1000 && isMuted)
+            else if ((idleMs < settings.IdleTimeoutSeconds * 1000 || isMediaPlaying) && isMuted)
             {
                 if (settings.MuteSystem) AudioController.MuteSystemAudio(false);
                 if (settings.MuteMic) AudioController.MuteMic(false);
@@ -81,6 +141,7 @@ namespace MuteMe
             }
         }
 
+
         private void OnSettingsClick(object? sender, EventArgs e)
         {
             using var settingsForm = new SettingsForm(settings);
@@ -88,7 +149,7 @@ namespace MuteMe
             {
                 settings = SettingsManager.Load(); // Reload settings
                 idleCheckTimer.Stop();
-                idleCheckTimer.Start(); // Reset timer just in case
+                idleCheckTimer.Start();
             }
         }
 
