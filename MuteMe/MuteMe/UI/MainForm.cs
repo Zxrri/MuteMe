@@ -79,6 +79,7 @@ namespace MuteMe
         {
             try
             {
+                // Check browser windows
                 foreach (string browser in supportedBrowsers)
                 {
                     var procs = Process.GetProcessesByName(browser);
@@ -137,7 +138,7 @@ namespace MuteMe
                 isMuted = false;
 
                 if (settings.ShowNotifications)
-                    trayIcon.ShowBalloonTip(1000, "MuteMe", "System unmuted – activity detected.", ToolTipIcon.Info);
+                    trayIcon.ShowBalloonTip(1000, "MuteMe", "System unmuted ï¿½ activity detected.", ToolTipIcon.Info);
             }
         }
 
