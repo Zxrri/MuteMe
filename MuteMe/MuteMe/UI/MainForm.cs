@@ -36,8 +36,8 @@ namespace MuteMe
 
             settings = SettingsManager.Load();
 
-            //FOR TESTING ONLY(10s timeout)
-            settings.IdleTimeoutSeconds = 10;
+            ////FOR TESTING ONLY(10s timeout)
+            //settings.IdleTimeoutSeconds = 10;
 
             this.ShowInTaskbar = false;
             this.WindowState = FormWindowState.Minimized;
