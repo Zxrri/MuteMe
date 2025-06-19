@@ -26,6 +26,10 @@ namespace MuteMe
             "chrome", "msedge", "firefox", "opera", "brave"
         };
 
+        private static readonly string[] mediaApps = new[]
+        {
+            "Spotify", "vlc", "wmplayer", "Music.UI", "Netflix", "AmazonVideo.PrimeVideo", 
+        };
         public MainForm()
         {
             InitializeComponent();
@@ -68,34 +72,41 @@ namespace MuteMe
             this.Hide(); 
         }
 
-        private bool IsMediaPlayingInBrowser()
+        private bool IsMediaPlaying()
         {
             try
             {
+                // Check browser windows
                 foreach (string browser in supportedBrowsers)
                 {
                     var procs = Process.GetProcessesByName(browser);
-
                     foreach (var p in procs)
                     {
                         string title = p.MainWindowTitle;
-
                         if (!string.IsNullOrWhiteSpace(title))
                         {
                             foreach (var keyword in mediaKeywords)
                             {
                                 if (title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return true; 
-                                }
+                                    return true;
                             }
                         }
+                    }
+                }
+
+                foreach (string app in mediaApps)
+                {
+                    var procs = Process.GetProcessesByName(app);
+                    foreach (var p in procs)
+                    {
+                        if (!string.IsNullOrWhiteSpace(p.MainWindowTitle))
+                            return true; // Running and has a UI
                     }
                 }
             }
             catch
             {
-                //Eating eror silently lol
+                // Ignore exceptions silently
             }
 
             return false;
@@ -106,7 +117,7 @@ namespace MuteMe
         {
             int idleMs = IdleWatcher.GetIdleTimeMs();
 
-            bool isMediaPlaying = IsMediaPlayingInBrowser();
+            bool isMediaPlaying = IsMediaPlaying();
 
             if (idleMs >= settings.IdleTimeoutSeconds * 1000 && !isMuted && !isMediaPlaying)
             {
