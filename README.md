@@ -1,5 +1,8 @@
 # 🔇 MuteMe
 
+[![CodeQL](https://github.com/Zxrri/MuteMe/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/Zxrri/MuteMe/actions/workflows/github-code-scanning/codeql)
+
+
 MuteMe is a Windows lightweight tray utility that automatically mutes your microphone and/or system audio after inactivity.
 
 ##  Features
