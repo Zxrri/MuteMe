@@ -39,4 +39,4 @@ Visit the [Releases tab](https://github.com/Zxrri/MuteMe/releases) to download t
 
 ---
 
-Made with ☕ and frustration over noisy meetings
+Made with ☕ and frustration 😄
