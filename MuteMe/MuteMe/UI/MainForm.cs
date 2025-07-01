@@ -16,6 +16,8 @@ namespace MuteMe
         private System.Windows.Forms.Timer idleCheckTimer;
         private AppSettings settings;
         private bool isMuted = false;
+        private bool isInGracePeriod = false;
+        private DateTime gracePeriodStartTime;
 
         private static readonly string[] mediaKeywords = new[]
         {
@@ -122,24 +124,49 @@ namespace MuteMe
             int idleMs = IdleWatcher.GetIdleTimeMs();
 
             bool isMediaPlaying = IsMediaPlaying();
+            bool isIdle = idleMs >= settings.IdleTimeoutSeconds * 1000;
+            bool hasActivity = idleMs < settings.IdleTimeoutSeconds * 1000 || isMediaPlaying;
 
-            if (idleMs >= settings.IdleTimeoutSeconds * 1000 && !isMuted && !isMediaPlaying)
+            // If user is active or media is playing, cancel grace period and unmute if needed
+            if (hasActivity)
             {
-                if (settings.MuteSystem) AudioController.MuteSystemAudio(true);
-                if (settings.MuteMic) AudioController.MuteMic(true);
-                isMuted = true;
+                if (isInGracePeriod)
+                {
+                    isInGracePeriod = false;
+                }
+                
+                if (isMuted)
+                {
+                    if (settings.MuteSystem) AudioController.MuteSystemAudio(false);
+                    if (settings.MuteMic) AudioController.MuteMic(false);
+                    isMuted = false;
 
-                if (settings.ShowNotifications)
-                    trayIcon.ShowBalloonTip(1000, "MuteMe", "System muted due to inactivity.", ToolTipIcon.Info);
+                    if (settings.ShowNotifications)
+                        trayIcon.ShowBalloonTip(1000, "MuteMe", "System unmuted � activity detected.", ToolTipIcon.Info);
+                }
             }
-            else if ((idleMs < settings.IdleTimeoutSeconds * 1000 || isMediaPlaying) && isMuted)
+            // If idle timeout reached and not already muted or in grace period
+            else if (isIdle && !isMuted && !isInGracePeriod)
             {
-                if (settings.MuteSystem) AudioController.MuteSystemAudio(false);
-                if (settings.MuteMic) AudioController.MuteMic(false);
-                isMuted = false;
+                // Start grace period
+                isInGracePeriod = true;
+                gracePeriodStartTime = DateTime.Now;
+            }
+            // If in grace period, check if grace period has expired
+            else if (isInGracePeriod && !isMuted)
+            {
+                TimeSpan gracePeriodElapsed = DateTime.Now - gracePeriodStartTime;
+                if (gracePeriodElapsed.TotalSeconds >= settings.GracePeriodSeconds)
+                {
+                    // Grace period expired, mute the system
+                    isInGracePeriod = false;
+                    if (settings.MuteSystem) AudioController.MuteSystemAudio(true);
+                    if (settings.MuteMic) AudioController.MuteMic(true);
+                    isMuted = true;
 
-                if (settings.ShowNotifications)
-                    trayIcon.ShowBalloonTip(1000, "MuteMe", "System unmuted � activity detected.", ToolTipIcon.Info);
+                    if (settings.ShowNotifications)
+                        trayIcon.ShowBalloonTip(1000, "MuteMe", "System muted due to inactivity.", ToolTipIcon.Info);
+                }
             }
         }
 
